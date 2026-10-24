@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Async Odyssey - Car Models Explorer</title>
+    <!-- Updated path using underscore -->
+    <link rel="stylesheet" href="./src_style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>🚗 Async Odyssey: Car Explorer</h1>
+            <p>Search car manufacturers (e.g., honda, toyota, ford) to explore models</p>
+        </header>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Enter car brand (e.g., honda)..." />
+            <button id="searchBtn">Search</button>
+        </div>
+
+        <div id="loadingIndicator" class="hidden">Querying vehicle databases... 🏎️</div>
+        <div id="errorMessage" class="hidden"></div>
+
+        <main id="resultContainer">
+            <div class="placeholder-text">Type a car brand above and hit search to load models.</div>
+        </main>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
