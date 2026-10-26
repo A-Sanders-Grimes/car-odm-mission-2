@@ -1,43 +1,63 @@
-const loadingIndicator = document.getElementById("loadingIndicator");
-const errorMessage = document.getElementById("errorMessage");
-const resultContainer = document.getElementById("resultContainer");
-
 export function showLoadingState() {
-    errorMessage.classList.add("hidden");
-    resultContainer.innerHTML = "";
-    loadingIndicator.classList.remove("hidden");
+    const errorMessage = document.getElementById("errorMessage");
+    const resultContainer = document.getElementById("resultContainer");
+    const loadingIndicator = document.getElementById("loadingIndicator");
+
+    if (errorMessage) errorMessage.classList.add("hidden");
+    if (resultContainer) resultContainer.innerHTML = "";
+    if (loadingIndicator) loadingIndicator.classList.remove("hidden");
 }
 
 export function hideLoadingState() {
-    loadingIndicator.classList.add("hidden");
+    const loadingIndicator = document.getElementById("loadingIndicator");
+    if (loadingIndicator) loadingIndicator.classList.add("hidden");
 }
 
 export function renderErrorState(message) {
     hideLoadingState();
-    errorMessage.textContent = message;
-    errorMessage.classList.remove("hidden");
+    const errorMessage = document.getElementById("errorMessage");
+    if (errorMessage) {
+        errorMessage.textContent = message;
+        errorMessage.classList.remove("hidden");
+    }
+}
+
+function escapeHtml(str) {
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 export function renderCarData(processedData) {
     hideLoadingState();
-    errorMessage.classList.add("hidden");
+    const errorMessage = document.getElementById("errorMessage");
+    const resultContainer = document.getElementById("resultContainer");
+    
+    if (errorMessage) errorMessage.classList.add("hidden");
+    if (!resultContainer) return;
 
-    const badgesHTML = processedData.modelNames
-        .map(model => `<span class="badge">${model}</span>`)
+    const groupsHTML = Object.entries(processedData.groupedByInitial)
+        .map(([letter, models]) => {
+            const badges = models
+                .map(m => `<span class="badge">${escapeHtml(m)}</span>`)
+                .join("");
+            return `
+                <div class="group-title">Letter ${letter} (${models.length})</div>
+                <div class="badge-container">${badges}</div>
+            `;
+        })
         .join("");
 
     resultContainer.innerHTML = `
         <div class="car-card">
-            <h2>Manufacturer: ${processedData.brand}</h2>
+            <h2>Manufacturer: ${escapeHtml(processedData.brand)}</h2>
             <div class="car-summary">
-                Total Models Registered: <strong>${processedData.totalModelsCount}</strong> | 
-                Name Chars Metric: <strong>${processedData.totalNameCharacters}</strong>
+                Unique Sorted Models: <strong>${processedData.totalModelsCount}</strong>
             </div>
-            
-            <div style="font-size: 0.85rem; font-weight: bold; color: #38bdf8; margin-top: 10px;">Available Models:</div>
-            <div class="badge-container">
-                ${badgesHTML}
-            </div>
+            ${groupsHTML}
         </div>
     `;
 }
