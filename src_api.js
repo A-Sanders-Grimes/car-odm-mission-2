@@ -4,19 +4,30 @@ export async function fetchCarModelsFromAPI(brandQuery) {
         throw new Error("Please enter a valid car manufacturer name.");
     }
 
-    // BONUS: Check localStorage cache so repeated queries load instantly
     const cacheKey = `car_brand_${formattedBrand}`;
-    const cachedData = localStorage.getItem(cacheKey);
-    if (cachedData) {
-        console.log("⚡ Loaded car data from localStorage cache!");
-        return JSON.parse(cachedData);
+    
+    try {
+        const cachedData = localStorage.getItem(cacheKey);
+        if (cachedData) {
+            console.log("⚡ Loaded car data from localStorage cache!");
+            return JSON.parse(cachedData);
+        }
+    } catch (err) {
+        console.warn("Cache corrupted, clearing entry.", err);
+        localStorage.removeItem(cacheKey);
     }
 
-    // Fetch official NHTSA public API with async/await
-    const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/getmodelsformake/${formattedBrand}?format=json`);
+    const safeBrand = encodeURIComponent(formattedBrand);
+
+    let response;
+    try {
+        response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/getmodelsformake/${safeBrand}?format=json`);
+    } catch (networkError) {
+        throw new Error("Network connection failed. Please check your internet connection.");
+    }
 
     if (!response.ok) {
-        throw new Error("Network response failed. Please try again.");
+        throw new Error("Server response failed. Please try again later.");
     }
 
     const data = await response.json();
@@ -25,6 +36,11 @@ export async function fetchCarModelsFromAPI(brandQuery) {
         throw new Error(`No models found for manufacturer "${formattedBrand}". Try honda, toyota, or ford.`);
     }
 
-    localStorage.setItem(cacheKey, JSON.stringify(data));
+    try {
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+    } catch (storageErr) {
+        console.warn("Could not save to localStorage", storageErr);
+    }
+
     return data;
 }
