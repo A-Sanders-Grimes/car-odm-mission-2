@@ -1,22 +1,25 @@
 export function processCarData(rawData, brandName) {
-    const results = rawData.Results;
+    const results = rawData.Results || [];
 
-    // 1. .map(): Extract model names into a clean array of strings
-    const modelNames = results.map(item => item.Model_Name);
+    const validNames = results
+        .map(item => item && typeof item.Model_Name === 'string' ? item.Model_Name.trim() : null)
+        .filter(name => name !== null && name.length > 0);
 
-    // 2. .filter(): Filter models containing specific characters
-    const filteredSpecialModels = modelNames.filter(name => 
-        name.toLowerCase().includes('a') || name.toLowerCase().includes('e')
-    );
+    const uniqueSortedModels = [...new Set(validNames)].sort((a, b) => a.localeCompare(b));
 
-    // 3. .reduce(): Count total character length of all model names combined
-    const totalNameCharacters = modelNames.reduce((acc, name) => acc + name.length, 0);
+    const groupedByInitial = uniqueSortedModels.reduce((acc, model) => {
+        const initial = model.charAt(0).toUpperCase();
+        if (!acc[initial]) {
+            acc[initial] = [];
+        }
+        acc[initial].push(model);
+        return acc;
+    }, {});
 
     return {
         brand: brandName.toUpperCase(),
-        totalModelsCount: results.length,
-        modelNames,
-        filteredSpecialModels,
-        totalNameCharacters
+        totalModelsCount: uniqueSortedModels.length,
+        uniqueSortedModels,
+        groupedByInitial
     };
 }
