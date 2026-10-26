@@ -1,6 +1,6 @@
-import { fetchCarModelsFromAPI } from './src_api.js';
-import { processCarData } from './src_logic.js';
-import { showLoadingState, renderErrorState, renderCarData } from './src_render.js';
+import { fetchCarModelsFromAPI } from './api.js';
+import { processCarData } from './logic.js';
+import { showLoadingState, hideLoadingState, renderErrorState, renderCarData } from './render.js';
 
 const searchInput = document.getElementById("searchInput");
 const searchBtn = document.getElementById("searchBtn");
@@ -8,6 +8,9 @@ const searchBtn = document.getElementById("searchBtn");
 async function handleSearch() {
     const query = searchInput.value;
     
+    searchBtn.disabled = true;
+    searchBtn.textContent = "Searching...";
+
     try {
         showLoadingState();
 
@@ -17,6 +20,10 @@ async function handleSearch() {
         renderCarData(processedData);
     } catch (error) {
         renderErrorState(error.message);
+    } finally {
+        searchBtn.disabled = false;
+        searchBtn.textContent = "Search";
+        hideLoadingState();
     }
 }
 
